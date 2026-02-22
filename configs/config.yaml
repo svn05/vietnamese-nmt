@@ -1,0 +1,43 @@
+# Vietnamese-English-Japanese NMT Configuration
+
+model:
+  name: "facebook/nllb-200-distilled-600M"
+  max_length: 128
+
+languages:
+  vietnamese:
+    code: "vie_Latn"
+    name: "Vietnamese"
+  english:
+    code: "eng_Latn"
+    name: "English"
+  japanese:
+    code: "jpn_Jpan"
+    name: "Japanese"
+
+training:
+  epochs: 3
+  batch_size: 8
+  learning_rate: 5e-5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  max_train_samples: 50000
+  eval_steps: 500
+  save_steps: 1000
+  fp16: true
+
+data:
+  opus_datasets:
+    vi_en: "Helsinki-NLP/opus-100"
+    vi_ja: "Helsinki-NLP/opus-100"
+  max_length: 128
+
+inference:
+  beam_size: 5
+  num_return_sequences: 1
+  length_penalty: 1.0
+  no_repeat_ngram_size: 3
+
+output:
+  model_dir: "./outputs/model"
+  results_dir: "./outputs/results"
