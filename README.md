@@ -2,6 +2,14 @@
 
 Fine-tuned **Meta's NLLB-200** on OPUS parallel corpora for **Vietnamese ↔ English ↔ Japanese** translation with beam search decoding. Deployed as a trilingual **Gradio** interface with language auto-detection.
 
+[![Live Demo](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/sanvo/vietnamese-nmt)
+
+## Demo
+
+![Demo Screenshot](demo_screenshot.png)
+
+**[Try the live demo on Hugging Face Spaces](https://huggingface.co/spaces/sanvo/vietnamese-nmt)**
+
 ## Features
 
 - **Trilingual translation**: Vietnamese ↔ English ↔ Japanese (all 6 directions)
