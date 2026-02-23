@@ -8,8 +8,6 @@ Usage:
 """
 
 import argparse
-import re
-import unicodedata
 
 
 def detect_language(text):

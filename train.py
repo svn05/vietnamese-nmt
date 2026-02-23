@@ -137,7 +137,8 @@ def main():
         save_data([{"src": p["vi"], "tgt": p["ja"]} for p in vi_ja], "vi_ja_train.jsonl")
 
     vi_en_pairs = load_pairs(vi_en_path)
-    print(f"Loaded {len(vi_en_pairs)} vi-en pairs")
+    vi_ja_pairs = load_pairs(vi_ja_path) if os.path.exists(vi_ja_path) else []
+    print(f"Loaded {len(vi_en_pairs)} vi-en pairs, {len(vi_ja_pairs)} vi-ja pairs")
 
     # Language codes for NLLB
     lang_codes = config["languages"]
