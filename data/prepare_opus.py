@@ -58,12 +58,12 @@ def load_opus_data(src_lang, tgt_lang, max_samples=50000):
     """
     lang_pair = f"{src_lang}-{tgt_lang}"
     try:
-        dataset = load_dataset("Helsinki-NLP/opus-100", lang_pair, split="train", trust_remote_code=True)
+        dataset = load_dataset("Helsinki-NLP/opus-100", lang_pair, split="train")
     except Exception:
         # Try reversed pair
         lang_pair = f"{tgt_lang}-{src_lang}"
         try:
-            dataset = load_dataset("Helsinki-NLP/opus-100", lang_pair, split="train", trust_remote_code=True)
+            dataset = load_dataset("Helsinki-NLP/opus-100", lang_pair, split="train")
         except Exception as e:
             print(f"Could not load OPUS data for {src_lang}-{tgt_lang}: {e}")
             return []

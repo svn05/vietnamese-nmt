@@ -17,14 +17,14 @@ languages:
 
 training:
   epochs: 3
-  batch_size: 8
-  learning_rate: 5e-5
+  batch_size: 4
+  learning_rate: 0.00005
   warmup_ratio: 0.1
   weight_decay: 0.01
-  max_train_samples: 50000
+  max_train_samples: 10000
   eval_steps: 500
   save_steps: 1000
-  fp16: true
+  fp16: false
 
 data:
   opus_datasets:

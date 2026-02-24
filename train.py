@@ -39,29 +39,21 @@ class TranslationDataset(Dataset):
         pair = self.pairs[idx]
         self.tokenizer.src_lang = self.src_lang
 
-        source = self.tokenizer(
+        encoded = self.tokenizer(
             pair["src"],
+            text_target=pair["tgt"],
             max_length=self.max_length,
             padding="max_length",
             truncation=True,
             return_tensors="pt",
         )
 
-        with self.tokenizer.as_target_tokenizer():
-            target = self.tokenizer(
-                pair["tgt"],
-                max_length=self.max_length,
-                padding="max_length",
-                truncation=True,
-                return_tensors="pt",
-            )
-
-        labels = target["input_ids"].squeeze(0)
+        labels = encoded["labels"].squeeze(0)
         labels[labels == self.tokenizer.pad_token_id] = -100
 
         return {
-            "input_ids": source["input_ids"].squeeze(0),
-            "attention_mask": source["attention_mask"].squeeze(0),
+            "input_ids": encoded["input_ids"].squeeze(0),
+            "attention_mask": encoded["attention_mask"].squeeze(0),
             "labels": labels,
         }
 
@@ -122,19 +114,32 @@ def main():
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
 
     total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Parameters: {total_params:,}")
+
+    # Freeze encoder to reduce memory and speed up training
+    for param in model.model.encoder.parameters():
+        param.requires_grad = False
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Trainable parameters (decoder only): {trainable_params:,}")
 
     # Load training data
     data_dir = "data"
-    vi_en_path = os.path.join(data_dir, "vi_en_train.jsonl")
+    # Use smaller subset if available for faster training
+    vi_en_small = os.path.join(data_dir, "vi_en_train_small.jsonl")
+    vi_en_path = vi_en_small if os.path.exists(vi_en_small) else os.path.join(data_dir, "vi_en_train.jsonl")
     vi_ja_path = os.path.join(data_dir, "vi_ja_train.jsonl")
 
     if not os.path.exists(vi_en_path):
-        print("Training data not found. Generating synthetic data...")
-        from data.prepare_opus import generate_synthetic_data, save_data
-        vi_en, vi_ja = generate_synthetic_data()
-        save_data([{"src": p["vi"], "tgt": p["en"]} for p in vi_en], "vi_en_train.jsonl")
-        save_data([{"src": p["vi"], "tgt": p["ja"]} for p in vi_ja], "vi_ja_train.jsonl")
+        print("Training data not found. Downloading OPUS parallel data...")
+        from data.prepare_opus import load_opus_data, save_data
+        max_samples = config["training"].get("max_train_samples", 10000)
+        vi_en = load_opus_data("vi", "en", max_samples)
+        if vi_en:
+            save_data(vi_en, "vi_en_train.jsonl")
+        vi_ja = load_opus_data("vi", "ja", max_samples)
+        if vi_ja:
+            save_data(vi_ja, "vi_ja_train.jsonl")
 
     vi_en_pairs = load_pairs(vi_en_path)
     vi_ja_pairs = load_pairs(vi_ja_path) if os.path.exists(vi_ja_path) else []
